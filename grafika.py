@@ -7,27 +7,29 @@ from matplotlib.animation import FuncAnimation
 
 from symulacja import Populacja
 
-pop = Populacja(30)
+pop = Populacja(40)
 
 fig, ax = plt.subplots()
 
 wykresy = {'zdrowy'   : plt.plot([],[],'go')[0],
             'chory'   : plt.plot([],[],'ro')[0],
-            'nosiciel': plt.plot([],[],'yo')[0]}
+            'nosiciel': plt.plot([],[],'yo')[0],
+            'martwy': plt.plot([],[],'ko')[0],
+            'odporny': plt.plot([],[],'mo')[0]}
 
 fig2, ax2 = plt.subplots()
 
 statystyki = {'zdrowy' :plt.plot([],[],'g')[0],
                 'chory':plt.plot([],[],'r')[0],
-                'nosiciel':plt.plot([],[],'y')[0]}
+                'nosiciel':plt.plot([],[],'y')[0],
+                'martwy': plt.plot([],[],'k')[0],
+                'odporny': plt.plot([],[],'m')[0]}
 
-ilosc = {'zdrowy' :[0],
-         'chory':[0],
-         'nosiciel':[0]}
+ilosc = {'zdrowy' :[],'chory':[],'nosiciel':[],'martwy':[],'odporny':[]}
 
 
 def init2():
-    ax2.set_xlim(0, 200)
+    ax2.set_xlim(0, 400)
     ax2.set_ylim(0, 30)
     return statystyki.values()
 
@@ -49,14 +51,15 @@ def update2(frame):
         i = 0
         for p in pop._pacjenci:
             if p.status == status:
-                 i = i + 1   
+                 i = i + 1
         ilosc[str(status)].append(i)
         wykres.set_data(range(len(ilosc[status])),ilosc[status])
-    return statystyki.values()   
-       
+    return statystyki.values()
+
 
 ani = FuncAnimation(fig, update, frames=None,
                      init_func=init, blit=True)
 ani2 = FuncAnimation(fig2, update2, frames=None,
                      init_func=init2, blit=True)
+
 plt.show(block=True)
