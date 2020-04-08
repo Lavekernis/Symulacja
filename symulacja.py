@@ -10,6 +10,27 @@ def d(p1,p2):
     return math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
 
 
+def dv_rand(v_max):
+    
+    dvx = random.uniform(-v_max, v_max)
+    dvy_max =  math.sqrt(v_max**2 - dvx**2)
+    dvy = random.uniform(-dvy_max, dvy_max)
+    
+    dv = (dvx, dvy)
+    return dv
+    
+def newv_rand(vx, vy, v_max, dv_max_percentage):
+    
+    dv_max = dv_max_percentage * v_max
+    while True:
+        dvx = random.uniform(-dv_max, dv_max)
+        dvy = random.uniform(-dv_max, dv_max)
+        if ((vx + dvx)**2 + (vy + dvy)**2 <= v_max):
+            break
+    
+    new_v = (vx + dvx, vy + dvy)
+    return new_v
+
 class Pacjent:
     """Pojedyncza osoba w symulacji.
 
@@ -20,10 +41,12 @@ class Pacjent:
 
     """
 
-    def __init__(self, x=0, y=0, czy_zdrowy=True):
+    def __init__(self, x=0, y=0, vx=0, vy=0, czy_zdrowy=True):
         self._lifetime = 100
         self._x = x
         self._y = y
+        self._vx = vx
+        self.vy = vy
         if czy_zdrowy:
             self._status = 'zdrowy'
         else:
@@ -34,17 +57,26 @@ class Pacjent:
 
         Zdrowy pacjent przesuwa się o 0-1, a chory o 0-0.1"""
         if self._status == 'chory':
-            zasieg = 5
+            vmax = 0.5
             self._lifetime = self._lifetime - 1
             if self._lifetime < 1:
                 self._status = random.choices(['martwy','odporny'],[50,50])[0]
         else:
             if self._status == 'martwy':
-                zasieg = 0
+                vmax = 0
+                self._vx = 0
+                self._vy = 0
             else:
-                zasieg = 1
-        self._x = self._x + random.uniform(-zasieg, zasieg)
-        self._y = self._y + random.uniform(-zasieg, zasieg)
+                vmax = 1
+        # fascynujące, że jak się poniżej zmieni ostatni argument
+        # z 0.5 na 0.4, 0.3, 0.25, to grafika.py przestaje działać - zawiesza się
+        if (vmax != 0):
+            newv = newv_rand(self._vx, self._vy, vmax, 0.5)
+            self._vx = newv[0]
+            self._vy = newv[1]
+            
+        self._x = self._x + self._vx
+        self._y = self._y + self._vy
 
     def __str__(self):
         return "Pacjent " + self._status + " @ "  + str(self._x) + " x " + str(self._y)
@@ -67,11 +99,26 @@ class Pacjent:
     @y.setter
     def y(self,y):
         self._y=y
+        
+    @property
+    def vx(self):
+        return self._vx
+
+    @vx.setter
+    def vx(self,vx):
+        self._vx=vx
+
+    @property
+    def vy(self):
+        return self._vy
+
+    @vy.setter
+    def vy(self,vy):
+        self._vy=vy
 
     @property
     def status(self):
         return self._status
-
 
     @status.setter
     def status(self,status):
@@ -105,8 +152,13 @@ class Populacja:
         for i in range(n):
             x = random.uniform(0, szerokosc)
             y = random.uniform(0, wysokosc)
+            
+            v = newv_rand(0, 0, 1, 1)
+            vx = v[0]
+            vy = v[1]
+            
             zdrowy = random.choices( [True, False], [80, 20] )[0]
-            self._pacjenci.append( Pacjent(x, y, zdrowy) )
+            self._pacjenci.append( Pacjent(x, y, vx, vy, zdrowy) )
     @property
     def wysokosc(self):
         return self._wysokosc
