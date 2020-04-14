@@ -15,7 +15,10 @@ wykresy = {'zdrowy' : plt.plot([],[],'go')[0],
             'chory' : plt.plot([],[],'ro')[0],
             'nosiciel' : plt.plot([],[],'yo')[0],
             'martwy' : plt.plot([],[],'ko')[0],
-            'odporny' : plt.plot([],[],'mo')[0]}
+            'odporny' : plt.plot([],[],'mo')[0],
+            #'zarazenia' : plt.scatter([20, 30], [20, 30])
+            'zarazenia' : plt.plot([],[], '*c', markersize = 20, zorder = 1)[0]
+            }
 
 fig2, ax2 = plt.subplots()
 
@@ -58,10 +61,29 @@ def init2():
 
 def update(frame):
     pop.ruch()
+    pop.historia_zarazen()
+    
+    #macierz transponowana macierzy pop._zarazenia:
+    #z_tr[0] - współrzędne x kolejnych zarażeń
+    #z_tr[1] - wspolrzedne y kolejnych zarażeń
+    #z_tr[2] - numer ruchu wystąpień kolejnych zarażeń
+    #z_tr[3] - ile ruchów upłynęło od kolejnych zarażeń
+    z_tr = [*zip(*pop._zarazenia)]
+
+    #pop.print_hist_zar()
     for status,wykres in wykresy.items():
-        xdata = [p.x for p in pop._pacjenci if p.status == status]
-        ydata = [p.y for p in pop._pacjenci if p.status == status]
-        wykres.set_data(xdata,ydata)
+        if status != 'zarazenia':
+            xdata = [p.x for p in pop._pacjenci if p.status == status]
+            ydata = [p.y for p in pop._pacjenci if p.status == status]
+            wykres.set_data(xdata,ydata)
+        else:
+            xdata = [z_tr[0][i] for i in range(len(z_tr[0])) if z_tr[3][i]<1000]
+            ydata = [z_tr[1][j] for j in range(len(z_tr[1])) if z_tr[3][j]<1000]
+            wykres.set_data(xdata,ydata)
+
+    #ax.scatter([10],[10])
+    #wykresy['zarazenia'] =  plt.scatter([5], [4], s = 20)
+
     return wykresy.values()
 
 def update2(frame):

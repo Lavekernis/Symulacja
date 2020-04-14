@@ -148,6 +148,7 @@ class Populacja:
         self._wysokosc = wysokosc
         self._szerokosc = szerokosc
         self.faza = 0
+        self._zarazenia = []
 
         for i in range(n):
             x = random.uniform(0, szerokosc)
@@ -198,4 +199,22 @@ class Populacja:
                 for x in self._pacjenci:
                     if x.status != 'zdrowy' and d(p,x) < 5:
                         p.status = random.choices(['nosiciel','chory'],[50,50])[0]
+                        self._zarazenia.append([p.x, p.y, self.faza, 0])
                         break
+
+    def historia_zarazen(self):
+        """ Zwraca listę zarażeń, której każdy element to lista trzech elementów:
+            współrzędnej x zarażenia, 
+            współrzędnej y zarażenia, 
+            liczby ruchów, które minęły od zarażenia do wywołania historia_zarażeń
+        """
+        faza = self.faza
+        for z in self._zarazenia:
+            z[3] = faza - z[2]
+            
+        return self._zarazenia
+    
+    def print_hist_zar(self):
+        for x in range(len(self._zarazenia)): 
+            for y in range(4):
+                print(self._zarazenia[x][y])
